@@ -27,6 +27,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final recentSessions = sessionRepo.getRecentSessions();
     final hasUnreadNotifs = notifRepo.hasUnread;
+    final user = AuthRepository().currentUser;
+    final userName = user?.name.split(' ').first ?? 'Alex';
+    final userInitials = (user?.name ?? 'Alex Rehabber')
+        .trim()
+        .split(' ')
+        .map((p) => p.isNotEmpty ? p[0] : '')
+        .take(2)
+        .join()
+        .toUpperCase();
 
     return Scaffold(
       backgroundColor: RSColors.surfaceCanvas,
@@ -51,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: RSText.bodyDefault.copyWith(color: RSColors.textSecondary),
                         ),
                         Text(
-                          'Alex',
+                          userName,
                           style: RSText.headingH1.copyWith(color: RSColors.textPrimary),
                         ),
                       ],
@@ -93,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       alignment: Alignment.center,
                       child: Text(
-                        'AR',
+                        userInitials,
                         style: RSText.bodySmallStrong.copyWith(color: RSColors.brandGreen),
                       ),
                     ),

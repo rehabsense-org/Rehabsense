@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
+import '../../data/repositories/repositories.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -39,13 +41,19 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
-    await Future.delayed(const Duration(milliseconds: 700));
-
-    if (!mounted) return;
-    setState(() => _loading = false);
-
-    // Success -> go home (clears auth stack per spec A 5.3)
-    context.go('/home');
+    try {
+      await AuthRepository().login(email, pwd);
+      if (!mounted) return;
+      context.go('/home');
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.message);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Unable to log in. Please check your credentials.');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override

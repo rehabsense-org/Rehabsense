@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
+import '../../data/repositories/repositories.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -19,9 +20,11 @@ class ProfileScreen extends StatelessWidget {
         body: 'Your rehabilitation progress and history remain safely saved to your account.',
         primaryButtonLabel: 'Log out',
         primaryIsDestructive: false,
-        onPrimaryPressed: () {
-          // Clear entire stack and go to login per spec A 5.3
-          context.go('/login');
+        onPrimaryPressed: () async {
+          await AuthRepository().logout();
+          if (context.mounted) {
+            context.go('/login');
+          }
         },
         secondaryButtonLabel: 'Cancel',
       ),
@@ -30,6 +33,12 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = AuthRepository().currentUser;
+    final displayName = user?.name ?? 'Alex Rehabber';
+    final displayEmail = user?.email.isNotEmpty == true ? user!.email : 'alex@rehab.test';
+    final initials = displayName.trim().isNotEmpty
+        ? displayName.trim().split(' ').map((p) => p.isNotEmpty ? p[0] : '').take(2).join().toUpperCase()
+        : 'AR';
     return Scaffold(
       backgroundColor: RSColors.surfaceCanvas,
       appBar: AppBar(
@@ -54,7 +63,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      'AR',
+                      initials,
                       style: RSText.headingH2.copyWith(color: RSColors.brandGreen, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -63,10 +72,10 @@ class ProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Alex Rehabber', style: RSText.headingH3),
+                        Text(displayName, style: RSText.headingH3),
                         const SizedBox(height: 2),
                         Text(
-                          'alex@rehab.test',
+                          displayEmail,
                           style: RSText.caption.copyWith(color: RSColors.textSecondary),
                         ),
                         const SizedBox(height: 4),

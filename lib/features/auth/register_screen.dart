@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
+import '../../data/repositories/repositories.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -68,13 +70,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _errorMessage = null;
     });
 
-    await Future.delayed(const Duration(milliseconds: 700));
-
-    if (!mounted) return;
-    setState(() => _loading = false);
-
-    // Proceed to email verification (31)
-    context.push('/verify-email', extra: email);
+    try {
+      await AuthRepository().register(name, email, pwd);
+      if (!mounted) return;
+      // Proceed to email verification (31)
+      context.push('/verify-email', extra: email);
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.message);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = 'Registration failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override

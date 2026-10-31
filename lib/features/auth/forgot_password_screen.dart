@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
+import '../../data/repositories/repositories.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -27,7 +28,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (email.isEmpty) return;
 
     setState(() => _loading = true);
-    await Future.delayed(const Duration(milliseconds: 700));
+    try {
+      await AuthRepository().forgotPassword(email);
+    } catch (_) {}
 
     if (!mounted) return;
     setState(() {
