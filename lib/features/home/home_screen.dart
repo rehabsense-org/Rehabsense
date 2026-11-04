@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../app/shell_scaffold.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/repositories/repositories.dart';
@@ -17,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final sessionRepo = SessionRepository();
   final notifRepo = NotificationRepository();
-  bool _loading = false;
+  final bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: RSColors.surfaceCanvas,
+      drawer: const RSAppDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: RSSpacing.screenH),
@@ -51,6 +53,20 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  Builder(
+                    builder: (ctx) => RSIconButton.soft(
+                      icon: LucideIcons.menu,
+                      onPressed: () {
+                        if (ShellScaffold.scaffoldKey.currentState != null) {
+                          ShellScaffold.scaffoldKey.currentState!.openDrawer();
+                        } else {
+                          Scaffold.of(ctx).openDrawer();
+                        }
+                      },
+                      semanticLabel: 'Open navigation menu',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -378,6 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSkeletonState() {
     return Scaffold(
       backgroundColor: RSColors.surfaceCanvas,
+      drawer: const RSAppDrawer(),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(RSSpacing.screenH),

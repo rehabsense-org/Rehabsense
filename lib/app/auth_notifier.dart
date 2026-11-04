@@ -97,7 +97,7 @@ class AuthNotifier extends ChangeNotifier {
           .from('profiles')
           .select('role, account_status')
           .eq('id', userId)
-          .maybeSingle();
+          .maybeSingle().timeout(const Duration(seconds: 3));
 
       if (res != null) {
         _role = UserRole.fromString(res['role'] as String?);
@@ -138,4 +138,5 @@ class AuthNotifier extends ChangeNotifier {
     super.dispose();
   }
 }
+
 

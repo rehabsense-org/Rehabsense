@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_mp_pose_landmarker/flutter_mp_pose_landmarker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/router.dart';
@@ -12,26 +11,18 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  // Initialize Supabase
+  // Initialize Supabase safely with a strict timeout so app launch is never blocked
   try {
     await Supabase.initialize(
       url: SupabaseConfig.url,
       anonKey: SupabaseConfig.anonKey,
-    );
+    ).timeout(const Duration(seconds: 3));
   } catch (e) {
-    debugPrint('Supabase initialization error: $e');
+    debugPrint('Supabase initialization notice (offline or timeout): $e');
   }
 
-  // Camera permissions
-  try {
-    final granted = await PoseLandmarker.checkCameraPermission();
-    if (!granted) {
-      await PoseLandmarker.requestCameraPermission();
-    }
-  } catch (e) {
-    debugPrint('Camera permission check: $e');
-  }
-
+  // Launch app immediately — camera permissions are handled in session setup
+  // and onboarding to avoid blocking OS window drawing with a white screen.
   runApp(const RehabSenseApp());
 }
 

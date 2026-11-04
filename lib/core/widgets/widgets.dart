@@ -1,6 +1,7 @@
 // ---------------------------------------------------------------------------
 // BARREL FILE — Core Widgets
 // ---------------------------------------------------------------------------
+export 'rs_app_drawer.dart';
 export 'rs_banner.dart';
 export 'rs_button.dart';
 export 'rs_card.dart';

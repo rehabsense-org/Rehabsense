@@ -89,33 +89,52 @@ class _AppOnboardingScreenState extends State<AppOnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top Bar: Logo & Skip ────────────────────────────────────────
+            // ── Top Bar: Logo & Skip Action ─────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: RSSpacing.screenH,
-                vertical: RSSpacing.sm,
+                vertical: RSSpacing.xs,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const RSLogo(variant: RSLogoVariant.lockup, size: 36),
-                  if (!isLast)
-                    TextButton(
-                      onPressed: _completeOnboarding,
-                      child: Text(
-                        'Skip',
-                        style: RSText.bodySmallStrong.copyWith(
-                          color: RSColors.textSecondary,
+              child: SizedBox(
+                height: 48,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: RSLogo(
+                          variant: RSLogoVariant.lockup,
+                          size: 34,
                         ),
                       ),
-                    )
-                  else
-                    const SizedBox(height: 40),
-                ],
+                    ),
+                    if (!isLast)
+                      TextButton(
+                        onPressed: _completeOnboarding,
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
+                          ),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: Text(
+                          'Skip',
+                          style: RSText.bodySmallStrong.copyWith(
+                            color: RSColors.textSecondary,
+                          ),
+                        ),
+                      )
+                    else
+                      const SizedBox(width: 48),
+                  ],
+                ),
               ),
             ),
 
-            // ── Page View Carousel ─────────────────────────────────────────
+            // ── Page View Carousel (Responsive & Scroll-Safe) ───────────────
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -125,110 +144,132 @@ class _AppOnboardingScreenState extends State<AppOnboardingScreen> {
                 },
                 itemBuilder: (context, index) {
                   final slide = _slides[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: RSSpacing.screenH,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Hero Icon Circle with Mint Glow
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: RSColors.brandMint,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: RSColors.brandMint.withValues(alpha: 0.4),
-                                blurRadius: 24,
-                                spreadRadius: 4,
-                              ),
-                            ],
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
                           ),
-                          child: Icon(
-                            slide.icon,
-                            size: 56,
-                            color: RSColors.brandGreen,
-                          ),
-                        ),
-                        const SizedBox(height: RSSpacing.xl),
-
-                        // Badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: RSColors.brandMint.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(RSRadius.pill),
-                          ),
-                          child: Text(
-                            slide.badge,
-                            style: RSText.captionStrong.copyWith(
-                              color: RSColors.brandGreen,
-                              letterSpacing: 0.8,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: RSSpacing.screenH,
+                              vertical: RSSpacing.sm,
                             ),
-                          ),
-                        ),
-                        const SizedBox(height: RSSpacing.md),
-
-                        // Title
-                        Text(
-                          slide.title,
-                          style: RSText.headingH1,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: RSSpacing.md),
-
-                        // Description
-                        Text(
-                          slide.description,
-                          style: RSText.bodyDefault.copyWith(
-                            color: RSColors.textSecondary,
-                            height: 1.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: RSSpacing.lg),
-
-                        // Highlight pill
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: RSSpacing.md,
-                            vertical: RSSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: RSColors.surfaceCard,
-                            borderRadius: BorderRadius.circular(RSRadius.pill),
-                            border: Border.all(
-                              color: RSColors.borderHairline,
-                              width: 1,
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                LucideIcons.checkCircle2,
-                                size: 16,
-                                color: RSColors.brandGreen,
-                              ),
-                              const SizedBox(width: RSSpacing.xs),
-                              Text(
-                                slide.highlight,
-                                style: RSText.captionStrong.copyWith(
-                                  color: RSColors.textPrimary,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Hero Icon Circle with Mint Glow
+                                Container(
+                                  width: 96,
+                                  height: 96,
+                                  decoration: BoxDecoration(
+                                    color: RSColors.brandMint,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: RSColors.brandMint
+                                            .withValues(alpha: 0.5),
+                                        blurRadius: 24,
+                                        spreadRadius: 3,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    slide.icon,
+                                    size: 46,
+                                    color: RSColors.brandGreen,
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: RSSpacing.lg),
+
+                                // Badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: RSColors.brandMint
+                                        .withValues(alpha: 0.65),
+                                    borderRadius:
+                                        BorderRadius.circular(RSRadius.pill),
+                                  ),
+                                  child: Text(
+                                    slide.badge,
+                                    style: RSText.captionStrong.copyWith(
+                                      color: RSColors.brandGreen,
+                                      letterSpacing: 0.8,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: RSSpacing.sm),
+
+                                // Title
+                                Text(
+                                  slide.title,
+                                  style: RSText.headingH1,
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: RSSpacing.sm),
+
+                                // Description
+                                Text(
+                                  slide.description,
+                                  style: RSText.bodyDefault.copyWith(
+                                    color: RSColors.textSecondary,
+                                    height: 1.45,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: RSSpacing.md),
+
+                                // Highlight pill (Adaptive padding & soft wrap)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: RSSpacing.sm,
+                                    vertical: RSSpacing.xs,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: RSColors.surfaceCard,
+                                    borderRadius:
+                                        BorderRadius.circular(RSRadius.pill),
+                                    border: Border.all(
+                                      color: RSColors.borderHairline,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        LucideIcons.checkCircle2,
+                                        size: 15,
+                                        color: RSColors.brandGreen,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: Text(
+                                          slide.highlight,
+                                          style: RSText.captionStrong.copyWith(
+                                            color: RSColors.textPrimary,
+                                            fontSize: 11.5,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
               ),
@@ -236,11 +277,14 @@ class _AppOnboardingScreenState extends State<AppOnboardingScreen> {
 
             // ── Bottom Section: Dots + Next CTA ────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: RSSpacing.screenH,
-                vertical: RSSpacing.lg,
+              padding: const EdgeInsets.fromLTRB(
+                RSSpacing.screenH,
+                RSSpacing.xs,
+                RSSpacing.screenH,
+                RSSpacing.md,
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Dot Indicators
                   Row(
@@ -261,7 +305,7 @@ class _AppOnboardingScreenState extends State<AppOnboardingScreen> {
                       );
                     }),
                   ),
-                  const SizedBox(height: RSSpacing.xl),
+                  const SizedBox(height: RSSpacing.md),
 
                   // Action Button
                   RSButton.primary(

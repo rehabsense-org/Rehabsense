@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Always initialize — catch everything so the splash never hangs
     try {
-      await AuthNotifier.instance.initialize();
+      await AuthNotifier.instance.initialize().timeout(const Duration(seconds: 2));
     } catch (_) {
       // Supabase unreachable → treat as unauthenticated
     }
@@ -122,3 +122,4 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+
