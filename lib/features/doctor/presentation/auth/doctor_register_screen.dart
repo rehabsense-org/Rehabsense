@@ -82,7 +82,13 @@ class _DoctorRegisterScreenState extends State<DoctorRegisterScreen> {
       appBar: AppBar(
         leading: RSIconButton.plain(
           icon: LucideIcons.chevronLeft,
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/welcome');
+            }
+          },
           semanticLabel: 'Back',
         ),
       ),
@@ -203,7 +209,7 @@ class _DoctorRegisterScreenState extends State<DoctorRegisterScreen> {
                 children: [
                   Text('Already have an account? ', style: RSText.bodySmall),
                   GestureDetector(
-                    onTap: () => context.pushReplacement('/doctor/login'),
+                    onTap: () => context.go('/doctor/login'),
                     child: Text(
                       'Log in',
                       style: RSText.bodySmallStrong.copyWith(color: RSColors.brandAction),

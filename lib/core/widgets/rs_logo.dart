@@ -25,16 +25,43 @@ class RSLogo extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: onDark
-            ? RSColors.brandMint.withOpacity(0.2)
-            : RSColors.brandMint,
-        shape: BoxShape.circle,
+        borderRadius: BorderRadius.circular(size * 0.24),
+        boxShadow: onDark
+            ? [
+                BoxShadow(
+                  color: RSColors.brandMint.withValues(alpha: 0.2),
+                  blurRadius: 12,
+                  spreadRadius: 1,
+                )
+              ]
+            : null,
       ),
-      alignment: Alignment.center,
-      child: Icon(
-        LucideIcons.activity,
-        size: size * 0.55,
-        color: markColor,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.24),
+        child: Image.asset(
+          'assets/images/app_logo.png',
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: onDark
+                    ? RSColors.brandMint.withValues(alpha: 0.2)
+                    : RSColors.brandMint,
+                borderRadius: BorderRadius.circular(size * 0.24),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                LucideIcons.activity,
+                size: size * 0.55,
+                color: markColor,
+              ),
+            );
+          },
+        ),
       ),
     );
 

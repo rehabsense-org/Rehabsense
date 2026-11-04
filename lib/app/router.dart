@@ -18,6 +18,7 @@ import '../features/auth/reset_password_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/auth/verify_email_screen.dart';
 import '../features/auth/welcome_screen.dart';
+import '../features/onboarding/app_onboarding_screen.dart';
 import '../features/onboarding/camera_help_screen.dart';
 import '../features/onboarding/profile_setup_screen.dart';
 import '../features/onboarding/safety_consent_screen.dart';
@@ -148,6 +149,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/splash',
       builder: (context, state) => const SplashScreen(),
+    ),
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const AppOnboardingScreen(),
     ),
     GoRoute(
       path: '/welcome',

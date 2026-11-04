@@ -50,18 +50,24 @@ supabase functions serve --env-file ./supabase/.env.local
 
 ---
 
-## 3. Creating Staff / Admin Accounts
+## 3. Seed Users & Portal Logins
 
-By system design, **admin accounts have no public self-signup**. To grant staff access:
-1. In the Supabase Dashboard, navigate to **Authentication > Users** and click **Add user** (or allow the staff member to sign up once as a standard user).
-2. In the **SQL Editor**, elevate the user's role:
-```sql
-update public.profiles
-set role = 'admin',
-    account_status = 'active'
-where email = 'staff@rehabsense.test';
-```
-3. The user can now sign in through the **Staff login** link on the Welcome screen.
+To test all three portals (Patient, Doctor, and Admin), run `supabase/seed.sql` in your Supabase SQL Editor. It automatically creates the following accounts in both `auth.users` and `public.profiles` with the universal test password:
+
+**Universal Test Password:** `Password123!`
+
+| Role | Email | Password | Target Portal / Route |
+| :--- | :--- | :--- | :--- |
+| **System Admin** | `admin@rehabsense.test` | `Password123!` | Welcome > **Staff login** (`/admin/login` &rarr; `/admin/dashboard`) |
+| **Dr. Sara Khan** | `sara.khan@clinic.test` | `Password123!` | Welcome > **I am a Doctor** (`/doctor/login` &rarr; `/doctor/home`) |
+| **Dr. Omar Sheikh**| `omar.sheikh@sports.test` | `Password123!` | Welcome > **I am a Doctor** (`/doctor/login` &rarr; `/doctor/home`) |
+| **Patient Alex** | `alex@rehab.test` | `Password123!` | Welcome > **Log in** (`/login` &rarr; `/home`) |
+
+> **Note on Foreign Key Constraints:**
+> In Supabase, `public.profiles(id)` references `auth.users(id)`. Inserting directly into `public.profiles` with custom UUIDs without first inserting into `auth.users` will fail with foreign key error `23503: profiles_id_fkey`. The provided `supabase/seed.sql` script creates the users in `auth.users` first, then configures their roles and profiles.
+
+### Alternative: Instant UI Testing via Demo Mode
+If Supabase is not running or credentials are unavailable, each login screen (`/login`, `/doctor/login`, `/admin/login`) features an **"Enter as [Role] (demo)"** button that bypasses network requests and immediately renders the full portal UI.
 
 ---
 

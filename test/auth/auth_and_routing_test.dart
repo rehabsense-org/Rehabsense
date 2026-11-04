@@ -5,6 +5,7 @@ import 'package:shariq_skeleton/app/auth_notifier.dart';
 import 'package:shariq_skeleton/app/router.dart';
 import 'package:shariq_skeleton/features/auth/inactive_account_screen.dart';
 import 'package:shariq_skeleton/features/auth/welcome_screen.dart';
+import 'package:shariq_skeleton/features/onboarding/app_onboarding_screen.dart';
 
 void main() {
   group('Phase 2 Auth and Routing Tests', () {
@@ -99,6 +100,26 @@ void main() {
       expect(find.text('Contact support'), findsOneWidget);
     });
 
+    testWidgets('AppOnboardingScreen renders slides and advances with continue', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: AppOnboardingScreen(),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.text('AI MOTION TRACKING'), findsOneWidget);
+      expect(find.text('Rehab guided by\nyour camera'), findsOneWidget);
+      expect(find.text('Continue'), findsOneWidget);
+      expect(find.text('Skip'), findsOneWidget);
+
+      // Advance
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('STRICT PRIVACY'), findsOneWidget);
+    });
+
     test('GoRouter contains expected entry points for all 3 portals and prescribed courses', () {
       final routes = appRouter.configuration.routes;
       final paths = <String>[];
@@ -110,6 +131,7 @@ void main() {
       }
 
       expect(paths, contains('/splash'));
+      expect(paths, contains('/onboarding'));
       expect(paths, contains('/welcome'));
       expect(paths, contains('/doctor/login'));
       expect(paths, contains('/admin/login'));

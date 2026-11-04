@@ -41,20 +41,11 @@ class WelcomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SizedBox(height: RSSpacing.xl),
-                          // Hero circle with activity icon
-                          Center(
-                            child: Container(
-                              width: 112,
-                              height: 112,
-                              decoration: const BoxDecoration(
-                                color: RSColors.brandMint,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                LucideIcons.activity,
-                                size: 56,
-                                color: RSColors.brandGreen,
-                              ),
+                          // Hero app icon
+                          const Center(
+                            child: RSLogo(
+                              variant: RSLogoVariant.mark,
+                              size: 104,
                             ),
                           ),
                           const SizedBox(height: RSSpacing.lg),
@@ -98,12 +89,12 @@ class WelcomeScreen extends StatelessWidget {
                           const SizedBox(height: RSSpacing.md),
                           RSButton.primary(
                             'Get started',
-                            () => context.push('/register'),
+                            () => context.go('/register'),
                           ),
                           const SizedBox(height: RSSpacing.sm),
                           RSButton.secondary(
                             'I already have an account',
-                            () => context.push('/login'),
+                            () => context.go('/login'),
                           ),
                           const SizedBox(height: RSSpacing.xs),
                           // Portal links: Doctor · Staff
@@ -113,7 +104,7 @@ class WelcomeScreen extends StatelessWidget {
                             crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               GestureDetector(
-                                onTap: () => context.push('/doctor/login'),
+                                onTap: () => context.go('/doctor/login'),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: RSSpacing.sm,
@@ -135,7 +126,7 @@ class WelcomeScreen extends StatelessWidget {
                                 ),
                               ),
                               GestureDetector(
-                                onTap: () => context.push('/admin/login'),
+                                onTap: () => context.go('/admin/login'),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: RSSpacing.sm,

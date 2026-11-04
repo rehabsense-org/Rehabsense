@@ -87,7 +87,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
       appBar: AppBar(
         leading: RSIconButton.plain(
           icon: LucideIcons.chevronLeft,
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/welcome');
+            }
+          },
           semanticLabel: 'Back',
         ),
       ),

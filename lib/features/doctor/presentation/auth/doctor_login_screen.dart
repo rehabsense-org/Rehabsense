@@ -92,7 +92,13 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
       appBar: AppBar(
         leading: RSIconButton.plain(
           icon: LucideIcons.chevronLeft,
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/welcome');
+            }
+          },
           semanticLabel: 'Back',
         ),
       ),
@@ -160,7 +166,7 @@ class _DoctorLoginScreenState extends State<DoctorLoginScreen> {
               const SizedBox(height: RSSpacing.md),
               RSButton.secondary(
                 'Create doctor account',
-                () => context.push('/doctor/register'),
+                () => context.go('/doctor/register'),
               ),
               const SizedBox(height: RSSpacing.lg),
               // ── Demo Mode ─────────────────────────────────────────────

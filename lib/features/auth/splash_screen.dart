@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../app/auth_notifier.dart';
 import '../../core/tokens.dart';
+import '../../core/widgets/widgets.dart';
 
 // ---------------------------------------------------------------------------
 // SplashScreen — Initialises auth, waits minimum 1.6 s, then routes.
-// Guaranteed to navigate regardless of Supabase errors.
+// Guaranteed to navigate safely to Onboarding, Welcome, or user's portal.
 // ---------------------------------------------------------------------------
 
 class SplashScreen extends StatefulWidget {
@@ -43,21 +44,30 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
 
-    _navigate();
+    await _navigate();
   }
 
-  void _navigate() {
+  Future<void> _navigate() async {
     final auth = AuthNotifier.instance;
 
-    // Not signed in → welcome
+    // Not signed in → check if onboarding has been seen
     if (!auth.isAuthenticated) {
-      context.go('/welcome');
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final hasSeenOnboarding = prefs.getBool('rs_has_seen_onboarding') ?? false;
+        if (!hasSeenOnboarding) {
+          if (mounted) context.go('/onboarding');
+          return;
+        }
+      } catch (_) {}
+
+      if (mounted) context.go('/welcome');
       return;
     }
 
     // Signed in but disabled
     if (auth.isAccountDisabled) {
-      context.go('/account-inactive');
+      if (mounted) context.go('/account-inactive');
       return;
     }
 
@@ -85,20 +95,12 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: RSColors.brandMint.withValues(alpha: 0.18),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                LucideIcons.activity,
-                size: 44,
-                color: RSColors.brandMint,
-              ),
+            const RSLogo(
+              variant: RSLogoVariant.mark,
+              size: 96,
+              onDark: true,
             ),
-            const SizedBox(height: RSSpacing.md),
+            const SizedBox(height: RSSpacing.lg),
             Text(
               'RehabSense',
               style: RSText.displayMedium.copyWith(
@@ -107,7 +109,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: RSSpacing.sm),
+            const SizedBox(height: RSSpacing.xs),
             Text(
               'Rehab, guided by your camera',
               style: RSText.bodyDefault.copyWith(

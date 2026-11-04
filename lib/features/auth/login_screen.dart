@@ -83,18 +83,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final canPop = Navigator.of(context).canPop();
-
     return Scaffold(
       backgroundColor: RSColors.surfaceCanvas,
       appBar: AppBar(
-        leading: canPop
-            ? RSIconButton.plain(
-                icon: LucideIcons.chevronLeft,
-                onPressed: () => context.pop(),
-                semanticLabel: 'Back',
-              )
-            : null,
+        leading: RSIconButton.plain(
+          icon: LucideIcons.chevronLeft,
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/welcome');
+            }
+          },
+          semanticLabel: 'Back',
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -177,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: RSSpacing.lg),
               RSButton.secondary(
                 'Create account',
-                () => context.push('/register'),
+                () => context.go('/register'),
               ),
               const SizedBox(height: RSSpacing.lg),
               // ── Demo Mode ─────────────────────────────────────────────

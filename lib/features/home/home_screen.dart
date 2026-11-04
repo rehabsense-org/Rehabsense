@@ -212,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text('Today’s plan', style: RSText.headingH3),
               const SizedBox(height: RSSpacing.sm),
               RSCard(
-                onTap: () => context.push('/courses/knee_rehab/exercise/knee_mini_squat'),
+                onTap: () => context.go('/courses/knee_rehab/exercise/knee_mini_squat'),
                 child: Row(
                   children: [
                     Container(
@@ -240,7 +240,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     RSButton.primary(
                       'Start',
-                      () => context.push('/courses/knee_rehab/exercise/knee_mini_squat'),
+                      () => context.go('/courses/knee_rehab/exercise/knee_mini_squat'),
                       size: RSButtonSize.medium,
                     ),
                   ],
@@ -266,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ...seedCourses.map((c) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: RSCard(
-                      onTap: () => context.push('/courses/${c.id}'),
+                      onTap: () => context.go('/courses/${c.id}'),
                       child: Row(
                         children: [
                           Container(
@@ -308,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text('Recent activity', style: RSText.headingH3),
                   GestureDetector(
-                    onTap: () => context.push('/progress/history'),
+                    onTap: () => context.go('/progress/history'),
                     child: Text(
                       'View all',
                       style: RSText.bodySmallStrong.copyWith(color: RSColors.brandAction),
@@ -331,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: RSCard(
-                      onTap: () => context.push('/progress/session/${s.id}'),
+                      onTap: () => context.go('/progress/session/${s.id}'),
                       child: Row(
                         children: [
                           Container(

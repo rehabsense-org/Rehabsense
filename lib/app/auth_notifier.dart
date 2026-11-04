@@ -50,27 +50,42 @@ class AuthNotifier extends ChangeNotifier {
   UserRole? get role => _role;
   AccountStatus? get accountStatus => _accountStatus;
   bool get isInitialized => _isInitialized;
-  bool get isAuthenticated => SupabaseConfig.client.auth.currentUser != null;
+  bool get isAuthenticated {
+    try {
+      return SupabaseConfig.clientOrNull?.auth.currentUser != null;
+    } catch (_) {
+      return false;
+    }
+  }
   bool get isAccountDisabled => _accountStatus == AccountStatus.disabled;
 
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    _authSubscription?.cancel();
-    _authSubscription = SupabaseConfig.client.auth.onAuthStateChange.listen((data) {
-      if (data.session != null) {
-        _loadUserProfile(data.session!.user.id);
-      } else {
-        _role = null;
-        _accountStatus = null;
-        notifyListeners();
-      }
-    });
-
-    final currentUser = SupabaseConfig.client.auth.currentUser;
-    if (currentUser != null) {
-      await _loadUserProfile(currentUser.id);
+    final client = SupabaseConfig.clientOrNull;
+    if (client == null) {
+      _isInitialized = true;
+      notifyListeners();
+      return;
     }
+
+    _authSubscription?.cancel();
+    try {
+      _authSubscription = client.auth.onAuthStateChange.listen((data) {
+        if (data.session != null) {
+          _loadUserProfile(data.session!.user.id);
+        } else {
+          _role = null;
+          _accountStatus = null;
+          notifyListeners();
+        }
+      });
+
+      final currentUser = client.auth.currentUser;
+      if (currentUser != null) {
+        await _loadUserProfile(currentUser.id);
+      }
+    } catch (_) {}
 
     _isInitialized = true;
     notifyListeners();

@@ -17,29 +17,40 @@ class AuthRepository {
   factory AuthRepository() => _instance;
   AuthRepository._internal();
 
+  SupabaseClient? get _clientOrNull => SupabaseConfig.clientOrNull;
   SupabaseClient get _client => SupabaseConfig.client;
 
   bool onboardingSeen = false;
   bool cameraConsent = false;
   bool profileComplete = false;
 
-  bool get isLoggedIn => _client.auth.currentUser != null;
+  bool get isLoggedIn {
+    try {
+      return _clientOrNull?.auth.currentUser != null;
+    } catch (_) {
+      return false;
+    }
+  }
 
   RSUser? get currentUser {
-    final user = _client.auth.currentUser;
-    if (user == null) return null;
-    final metadata = user.userMetadata ?? {};
-    return RSUser(
-      id: user.id,
-      name: (metadata['name'] as String?) ??
-          user.email?.split('@').first ??
-          'Alex Rehabber',
-      email: user.email ?? '',
-      emailVerified: user.emailConfirmedAt != null,
-      ageRange: metadata['age_range'] as String?,
-      goal: metadata['goal'] as String?,
-      createdAt: DateTime.tryParse(user.createdAt) ?? DateTime.now(),
-    );
+    try {
+      final user = _clientOrNull?.auth.currentUser;
+      if (user == null) return null;
+      final metadata = user.userMetadata ?? {};
+      return RSUser(
+        id: user.id,
+        name: (metadata['name'] as String?) ??
+            user.email?.split('@').first ??
+            'Alex Rehabber',
+        email: user.email ?? '',
+        emailVerified: user.emailConfirmedAt != null,
+        ageRange: metadata['age_range'] as String?,
+        goal: metadata['goal'] as String?,
+        createdAt: DateTime.tryParse(user.createdAt) ?? DateTime.now(),
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<RSUser> login(String email, String password) async {

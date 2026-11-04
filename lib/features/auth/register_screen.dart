@@ -93,7 +93,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         leading: RSIconButton.plain(
           icon: LucideIcons.chevronLeft,
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/welcome');
+            }
+          },
           semanticLabel: 'Back',
         ),
         title: const Text('Create account'),
@@ -188,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   Text('Already have an account?', style: RSText.bodySmall.copyWith(color: RSColors.textSecondary)),
                   TextButton(
-                    onPressed: () => context.push('/login'),
+                    onPressed: () => context.go('/login'),
                     style: TextButton.styleFrom(minimumSize: const Size(60, 36)),
                     child: Text('Log in', style: RSText.bodySmallStrong.copyWith(color: RSColors.brandAction)),
                   ),
