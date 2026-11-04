@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/seed/seed_data.dart';
+import 'pain_alert_sheet.dart';
 
 class SessionSummaryScreen extends StatefulWidget {
   final String exerciseId;
@@ -18,6 +19,23 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
   bool _saved = false;
   final int _score = 86;
   final bool _isPersonalBest = true;
+  double _painLevel = 2.0;
+  final TextEditingController _commentController = TextEditingController();
+  bool _alertShown = false;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  void _onPainChanged(double val) {
+    setState(() => _painLevel = val);
+    if (val >= 7.0 && !_alertShown) {
+      _alertShown = true;
+      PainAlertSheet.show(context, painLevel: val.round());
+    }
+  }
 
   void _showLeaveSheet() {
     if (_saved) {
@@ -244,6 +262,34 @@ class _SessionSummaryScreenState extends State<SessionSummaryScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: RSSpacing.lg),
+
+              // ── Post-Session Pain Rating ─────────────────────────────
+              RSCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('PAIN ASSESSMENT', style: RSText.labelOverline.copyWith(color: RSColors.textSecondary)),
+                    const SizedBox(height: 12),
+                    RSSlider(
+                      title: 'Pain level during exercise',
+                      value: _painLevel,
+                      onChanged: _onPainChanged,
+                      min: 0,
+                      max: 10,
+                      divisions: 10,
+                      minLabel: '0 - No pain',
+                      maxLabel: '10 - Severe',
+                    ),
+                    const SizedBox(height: 16),
+                    RSInput(
+                      label: 'Notes / Comments (Optional)',
+                      hintText: 'Describe how your joint felt or any discomfort...',
+                      controller: _commentController,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: RSSpacing.lg),
 

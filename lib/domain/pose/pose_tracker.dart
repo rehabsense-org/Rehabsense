@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mp_pose_landmarker/flutter_mp_pose_landmarker.dart';
 
+export 'tracking_engine.dart';
+
 // ---------------------------------------------------------------------------
 // CAMERA ALIGNMENT (confirmed working - do not change)
 // ---------------------------------------------------------------------------

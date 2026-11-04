@@ -54,6 +54,17 @@ final List<RSExercise> seedExercises = const [
     targetSets: 2,
     restSeconds: 30,
     joints: ['knee', 'hip', 'ankle'],
+    trackingType: 'rep',
+    cameraView: 'side',
+    trackingConfig: TrackingConfig(
+      joint: 'knee',
+      type: TrackingType.rep,
+      startAngle: 170.0,
+      targetAngle: 135.0,
+      tolerance: 15.0,
+      leftLandmarks: [23, 25, 27],
+      rightLandmarks: [24, 26, 28],
+    ),
     steps: [
       'Stand with feet shoulder-width apart, toes pointing forward.',
       'Slowly bend your knees to about 30–45 degrees as if sitting back.',
@@ -292,5 +303,77 @@ final List<RSExercise> seedExercises = const [
     whatItHelps:
         'Strengthens the mid-back muscles (rhomboids and middle trapezius), '
         'improving posture and shoulder blade stability.',
+  ),
+
+  // ── 6. Wall Sit Hold ──────────────────────────────────────────────────────
+  RSExercise(
+    id: 'ex_wall_sit_hold',
+    courseId: 'knee_rehab',
+    order: 6,
+    name: 'Wall Sit hold',
+    targetReps: 3,
+    targetSets: 1,
+    restSeconds: 60,
+    joints: ['knee', 'hip'],
+    trackingType: 'hold',
+    cameraView: 'side',
+    trackingConfig: TrackingConfig(
+      joint: 'knee',
+      type: TrackingType.hold,
+      minAngle: 80.0,
+      maxAngle: 100.0,
+      holdSeconds: 30,
+      graceSeconds: 2,
+      leftLandmarks: [23, 25, 27],
+      rightLandmarks: [24, 26, 28],
+    ),
+    steps: [
+      'Lean your back flat against a sturdy wall.',
+      'Slide down until your knees are bent to approximately 90 degrees.',
+      'Hold the position steadily while keeping your core engaged.',
+      'Slide back up smoothly to complete the hold.',
+    ],
+    watchOutFor: [
+      'Do not slide down past 90 degrees.',
+      'Ensure your knees stay over your ankles, not past your toes.',
+    ],
+    whatItHelps:
+        'Builds isometric quadriceps endurance and improves knee joint stability.',
+  ),
+
+  // ── 7. Warrior II Hold (Yoga) ─────────────────────────────────────────────
+  RSExercise(
+    id: 'ex_warrior_2',
+    courseId: 'knee_rehab',
+    order: 7,
+    name: 'Warrior II hold',
+    targetReps: 3,
+    targetSets: 1,
+    restSeconds: 45,
+    joints: ['knee', 'shoulder'],
+    trackingType: 'hold',
+    cameraView: 'front',
+    trackingConfig: TrackingConfig(
+      joint: 'knee',
+      type: TrackingType.hold,
+      minAngle: 85.0,
+      maxAngle: 105.0,
+      holdSeconds: 20,
+      graceSeconds: 2,
+      leftLandmarks: [23, 25, 27],
+      rightLandmarks: [24, 26, 28],
+    ),
+    steps: [
+      'Step feet wide apart with arms extended parallel to the floor.',
+      'Turn front foot outward 90 degrees and bend front knee.',
+      'Hold gaze over the front hand keeping shoulders relaxed.',
+      'Breathe steadily throughout the hold.',
+    ],
+    watchOutFor: [
+      'Torso stays upright, not leaning forward.',
+      'Front knee remains aligned over ankle.',
+    ],
+    whatItHelps:
+        'Builds leg strength, hip flexibility and upper body alignment.',
   ),
 ];

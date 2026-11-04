@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --green:#006241; --action:#00754A; --deep:#1E3932; --mint:#D4E9E2; --canvas:#F2F0EB; --card:#FFFFFF; --ink:rgba(0,0,0,.87); --sub:rgba(0,0,0,.58); --line:#E7E7E7; --err:#C82014; --warn:#8A6100; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: Inter, -apple-system, Segoe UI, sans-serif; font-size:13px; color:var(--ink); background:var(--canvas); }
+  header { background:var(--deep); color:#fff; padding:16px; }
+  header h1 { margin:0 0 4px; font-size:16px; font-weight:600; }
+  header p { margin:0; font-size:12px; color:rgba(255,255,255,.7); line-height:1.5; }
+  main { padding:12px 16px 24px; }
+  .card { background:var(--card); border-radius:12px; padding:12px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,.07); }
+  .card h2 { margin:0 0 8px; font-size:13px; font-weight:600; color:var(--green); }
+  label.row { display:flex; align-items:center; gap:8px; padding:5px 0; cursor:pointer; }
+  input[type=checkbox] { accent-color: var(--action); width:16px; height:16px; margin:0; }
+  button { font-family:inherit; cursor:pointer; border:0; border-radius:50px; font-weight:600; }
+  .primary { width:100%; height:44px; background:var(--action); color:#fff; font-size:14px; }
+  .primary:disabled { background:#EDEBE9; color:var(--sub); cursor:default; }
+  .ghost { height:32px; padding:0 14px; background:transparent; color:var(--action); border:1px solid var(--action); font-size:12px; }
+  .danger { color:var(--err); border-color:var(--err); }
+  .msg { font-size:12px; line-height:1.5; padding:8px 10px; border-radius:8px; margin-top:8px; }
+  .busy { background:var(--mint); color:#33433D; } .okm { background:#EAF4F0; color:var(--action); } .errm { background:#FBECEB; color:var(--err); } .warnm { background:#FEF5DA; color:var(--warn); }
+  input[type=text] { width:100%; height:36px; border:1px solid #D6DBDE; border-radius:4px; padding:0 10px; font-family:inherit; font-size:13px; margin-bottom:8px; }
+  .group { margin:12px 0 4px; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--sub); }
+  .item { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--line); }
+  .item .id { font-weight:600; width:56px; flex:none; } .item .nm { flex:1; line-height:1.3; }
+  .tag { font-size:10px; font-weight:700; padding:2px 7px; border-radius:50px; flex:none; }
+  .NEW { background:#EAF4F0; color:#00754A; } .CHANGED { background:#FEF5DA; color:#8A6100; } .EXISTING { background:#EDEBE9; color:#58606A; }
+  .go { height:26px; padding:0 12px; background:var(--mint); color:var(--green); font-size:11px; flex:none; }
+  .hint { font-size:11px; color:var(--sub); line-height:1.5; }
+  .row2 { display:flex; gap:8px; } .row2 button { flex:1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>RehabSense Prototype Builder</h1>
+  <p>Builds every Patient, Doctor and Admin screen from UPDATE BRIEF v2 using the design tokens from PROJECT HANDOFF, with clickable prototype links.</p>
+</header>
+<main>
+  <div class="card">
+    <h2>1. What to build</h2>
+    <label class="row"><input type="checkbox" id="pPatient" checked> Patient portal (existing, changed and new)</label>
+    <label class="row"><input type="checkbox" id="pDoctor" checked> Doctor portal</label>
+    <label class="row"><input type="checkbox" id="pAdmin" checked> Admin portal</label>
+    <label class="row"><input type="checkbox" id="oLinks" checked> Wire prototype links (every button)</label>
+    <label class="row"><input type="checkbox" id="oLabels" checked> Show ID and status labels (NEW, CHANGED, EXISTING)</label>
+  </div>
+  <button class="primary" id="gen">Generate screens and prototype</button>
+  <div id="msg"></div>
+  <div class="card" style="margin-top:12px">
+    <h2>2. Open the prototype</h2>
+    <p class="hint" style="margin:0">After generating, select the first frame (P-01, D-01 or A-01) and press the Present button at the top right of Figma. Flow starting points are already set for the three portals.</p>
+  </div>
+  <div class="card">
+    <h2>3. Screens</h2>
+    <input type="text" id="q" placeholder="Search by ID or name, for example P-17 or Live">
+    <div id="list"><p class="hint">No screens yet. Press Generate.</p></div>
+  </div>
+  <div class="row2"><button class="ghost danger" id="clear">Delete generated page</button><button class="ghost" id="refresh">Refresh list</button></div>
+</main>
+<script>
+  var items = [];
+  var $ = function (id) { return document.getElementById(id); };
+  function post(m) { parent.postMessage({ pluginMessage: m }, '*'); }
+  function setMsg(cls, t) { $('msg').innerHTML = t ? '<div class="msg ' + cls + '">' + t + '</div>' : ''; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function render() {
+    var q = $('q').value.toLowerCase(), html = '', last = '';
+    items.forEach(function (it) {
+      if (q && (it.id + ' ' + it.name).toLowerCase().indexOf(q) < 0) return;
+      if (it.group !== last) { html += '<div class="group">' + esc(it.group) + '</div>'; last = it.group; }
+      html += '<div class="item"><span class="id">' + esc(it.id) + '</span><span class="nm">' + esc(it.name) + '</span><span class="tag ' + it.status + '">' + it.status + '</span><button class="go" data-n="' + it.nodeId + '">Go</button></div>';
+    });
+    $('list').innerHTML = html || '<p class="hint">No screens to show.</p>';
+  }
+  $('list').addEventListener('click', function (e) { var n = e.target.getAttribute && e.target.getAttribute('data-n'); if (n) post({ type: 'goto', nodeId: n }); });
+  $('q').addEventListener('input', render);
+  $('gen').addEventListener('click', function () {
+    $('gen').disabled = true;
+    post({ type: 'generate', portals: { patient: $('pPatient').checked, doctor: $('pDoctor').checked, admin: $('pAdmin').checked }, links: $('oLinks').checked, labels: $('oLabels').checked });
+  });
+  $('clear').addEventListener('click', function () { post({ type: 'clear' }); });
+  $('refresh').addEventListener('click', function () { post({ type: 'scan' }); });
+  onmessage = function (ev) {
+    var m = ev.data.pluginMessage; if (!m) return;
+    if (m.type === 'busy') setMsg('busy', esc(m.message));
+    if (m.type === 'error') { $('gen').disabled = false; setMsg('errm', 'Error: ' + esc(m.message)); }
+    if (m.type === 'catalog') {
+      $('gen').disabled = false; items = m.items || []; render();
+      if (m.summary) {
+        var t = m.summary.screens + ' screens' + (m.summary.links != null ? ', ' + m.summary.links + ' prototype links wired.' : '.');
+        if (m.summary.missing && m.summary.missing.length) setMsg('warnm', t + '<br>Skipped ' + m.summary.missing.length + ' link(s) to portals you did not build, for example ' + esc(m.summary.missing[0]) + '.');
+        else setMsg('okm', t);
+      } else setMsg('', '');
+    }
+  };
+  post({ type: 'scan' });
+</script>
+</body>
+</html>

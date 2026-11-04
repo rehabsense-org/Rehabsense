@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../app/auth_notifier.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
 import '../../data/repositories/repositories.dart';
@@ -43,17 +44,41 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await AuthRepository().login(email, pwd);
+      await AuthNotifier.instance.initialize();
+
       if (!mounted) return;
-      context.go('/home');
+
+      final auth = AuthNotifier.instance;
+      if (auth.isAccountDisabled) {
+        context.go('/account-inactive');
+        return;
+      }
+
+      if (auth.role == UserRole.doctor) {
+        context.go('/doctor/home');
+      } else if (auth.role == UserRole.admin) {
+        context.go('/admin/dashboard');
+      } else {
+        context.go('/home');
+      }
     } on AuthException catch (e) {
       if (!mounted) return;
       setState(() => _errorMessage = e.message);
-    } catch (e) {
+    } catch (_) {
       if (!mounted) return;
-      setState(() => _errorMessage = 'Unable to log in. Please check your credentials.');
+      setState(() => _errorMessage = 'Unable to connect. Use demo mode below.');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  /// Demo bypass — sets mock patient state without Supabase.
+  void _enterDemoMode() {
+    AuthNotifier.instance.setMockState(
+      role: UserRole.patient,
+      status: AccountStatus.active,
+    );
+    context.go('/home');
   }
 
   @override
@@ -107,9 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _passwordController,
                 obscureText: _obscurePassword,
                 prefixIcon: LucideIcons.lock,
-                suffixIcon: _obscurePassword
-                    ? LucideIcons.eye
-                    : LucideIcons.eyeOff,
+                suffixIcon:
+                    _obscurePassword ? LucideIcons.eye : LucideIcons.eyeOff,
                 onSuffixTap: () {
                   setState(() => _obscurePassword = !_obscurePassword);
                 },
@@ -126,7 +150,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Text(
                     'Forgot password?',
-                    style: RSText.bodySmallStrong.copyWith(color: RSColors.brandAction),
+                    style: RSText.bodySmallStrong
+                        .copyWith(color: RSColors.brandAction),
                   ),
                 ),
               ),
@@ -142,7 +167,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Expanded(child: Divider()),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text('or', style: RSText.caption.copyWith(color: RSColors.textSecondary)),
+                    child: Text('or',
+                        style: RSText.caption
+                            .copyWith(color: RSColors.textSecondary)),
                   ),
                   const Expanded(child: Divider()),
                 ],
@@ -151,6 +178,39 @@ class _LoginScreenState extends State<LoginScreen> {
               RSButton.secondary(
                 'Create account',
                 () => context.push('/register'),
+              ),
+              const SizedBox(height: RSSpacing.lg),
+              // ── Demo Mode ─────────────────────────────────────────────
+              Container(
+                decoration: BoxDecoration(
+                  color: RSColors.statusWarningTint,
+                  borderRadius: BorderRadius.circular(RSRadius.card),
+                  border: Border.all(color: RSColors.statusWarning, width: 1),
+                ),
+                padding: const EdgeInsets.all(RSSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(LucideIcons.flaskConical,
+                            size: 16, color: RSColors.statusWarningInk),
+                        const SizedBox(width: RSSpacing.xs),
+                        Text(
+                          'Demo mode — no Supabase needed',
+                          style: RSText.captionStrong.copyWith(
+                            color: RSColors.statusWarningInk,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: RSSpacing.sm),
+                    RSButton.primary(
+                      'Enter as Patient (demo)',
+                      _enterDemoMode,
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: RSSpacing.xl),
             ],

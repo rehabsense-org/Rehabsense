@@ -121,6 +121,31 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: RSSpacing.lg),
 
+            // Care Team & Condition
+            RSMenuCard(
+              items: [
+                RSMenuRowItem(
+                  icon: LucideIcons.userPlus,
+                  title: 'Connect with a doctor',
+                  subtitle: 'Share your condition & get a prescribed plan',
+                  onTap: () => context.push('/connect'),
+                ),
+                RSMenuRowItem(
+                  icon: LucideIcons.heartHandshake,
+                  title: 'My Doctor',
+                  subtitle: 'Dr. Sara Khan · City Rehab Clinic',
+                  onTap: () => context.push('/my-doctor'),
+                ),
+                RSMenuRowItem(
+                  icon: LucideIcons.clipboardList,
+                  title: 'My Condition',
+                  subtitle: 'View & update recovery symptoms',
+                  onTap: () => context.push('/my-condition'),
+                ),
+              ],
+            ),
+            const SizedBox(height: RSSpacing.lg),
+
             // Menu card: Settings, Notifications, Help & FAQ, Privacy & data, About
             RSMenuCard(
               items: [

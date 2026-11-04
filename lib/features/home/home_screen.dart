@@ -109,7 +109,46 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: RSSpacing.lg),
+              const SizedBox(height: RSSpacing.md),
+
+              // ── Clinical Care Banner / Connect with Doctor CTA ───────
+              RSCard(
+                onTap: () => context.push('/connect'),
+                padding: const EdgeInsets.all(RSSpacing.md),
+                color: RSColors.brandMint,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: RSColors.surfaceCard,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(LucideIcons.heartHandshake, color: RSColors.brandGreen, size: 22),
+                    ),
+                    const SizedBox(width: RSSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Connect with a physiotherapist',
+                            style: RSText.bodySmallStrong.copyWith(color: RSColors.brandGreen),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Get a tailored plan prescribed for your condition.',
+                            style: RSText.caption.copyWith(color: RSColors.brandDeep),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(LucideIcons.chevronRight, color: RSColors.brandGreen, size: 20),
+                  ],
+                ),
+              ),
+              const SizedBox(height: RSSpacing.md),
 
               // ── Continue where you left off Card ───────────────────────
               Container(

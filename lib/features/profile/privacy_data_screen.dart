@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../app/auth_notifier.dart';
+import '../../core/supabase_config.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
 
@@ -54,9 +56,21 @@ class PrivacyDataScreen extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: canDelete
-                    ? () {
+                    ? () async {
                         Navigator.pop(ctx);
-                        context.go('/welcome');
+                        try {
+                          final uid = SupabaseConfig.client.auth.currentUser?.id;
+                          if (uid != null) {
+                            await SupabaseConfig.client.from('profiles').update({
+                              'account_status': 'disabled',
+                              'archived_at': DateTime.now().toIso8601String(),
+                            }).eq('id', uid);
+                          }
+                        } catch (_) {}
+                        await AuthNotifier.instance.signOut();
+                        if (context.mounted) {
+                          context.go('/welcome');
+                        }
                       }
                     : null,
                 style: ElevatedButton.styleFrom(

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../core/tokens.dart';
 import '../../core/widgets/widgets.dart';
+import '../../data/seed/seed_data.dart';
 import '../../domain/pose/pose_tracker.dart';
 
 class CameraSetupScreen extends StatefulWidget {
@@ -108,6 +109,11 @@ class _CameraSetupScreenState extends State<CameraSetupScreen> {
   @override
   Widget build(BuildContext context) {
     final readyToStart = _bodyDetected;
+    final exercise = seedExercises.firstWhere(
+      (e) => e.id == widget.exerciseId,
+      orElse: () => seedExercises.first,
+    );
+    final viewInstruction = exercise.cameraView.toLowerCase() == 'front' ? 'Front' : 'Side';
 
     return Scaffold(
       backgroundColor: RSColors.surfaceCamera,
@@ -202,6 +208,29 @@ class _CameraSetupScreenState extends State<CameraSetupScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: RSColors.brandMint,
+                          borderRadius: BorderRadius.circular(RSRadius.pill),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(LucideIcons.camera, size: 14, color: RSColors.brandGreen),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Camera Angle: $viewInstruction',
+                              style: RSText.captionStrong.copyWith(color: RSColors.brandGreen),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Container(

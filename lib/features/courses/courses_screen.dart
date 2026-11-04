@@ -25,6 +25,41 @@ class CoursesScreen extends StatelessWidget {
               'Select a physiotherapy programme to begin your movement sessions.',
               style: RSText.bodyDefault.copyWith(color: RSColors.textSecondary),
             ),
+            const SizedBox(height: RSSpacing.md),
+
+            // ── Prescribed Container Banner ────────────────────────────
+            RSCard(
+              onTap: () => context.push('/courses/prescribed'),
+              color: RSColors.brandMint,
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      color: RSColors.brandGreen,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(LucideIcons.stethoscope, color: RSColors.textOnDark, size: 22),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Prescribed by Your Doctor', style: RSText.bodyStrong.copyWith(color: RSColors.brandGreen)),
+                        const SizedBox(height: 2),
+                        Text(
+                          '3 active assigned exercises from Dr. Sara Khan',
+                          style: RSText.caption.copyWith(color: RSColors.textPrimary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(LucideIcons.chevronRight, color: RSColors.brandGreen, size: 20),
+                ],
+              ),
+            ),
             const SizedBox(height: RSSpacing.lg),
             ...seedCourses.map((c) {
               return Padding(

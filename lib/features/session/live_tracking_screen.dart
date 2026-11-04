@@ -27,6 +27,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
   final MotionTracker _motion = MotionTracker();
   final PostureChecker _posture = PostureChecker();
 
+  late final RSExercise _exercise;
+  late final TrackingEngine _engine;
+
   List<PoseLandmarkPoint> _landmarks = [];
   Map<int, double?> _angles = {};
   Map<int, double> _speeds = {};
@@ -34,25 +37,21 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
   bool _frontCamera = true;
   bool _audioEnabled = true;
 
-  // Rep tracking state
-  int _currentReps = 0;
-  final int _targetReps = 10;
-  String _phase = 'Ready'; // 'Moving down', 'Hold', 'Moving up', 'Count'
-  String _feedbackLine = 'Keep your shoulders level and chest up';
-  Color _feedbackColor = RSColors.statusSuccess;
-  IconData _feedbackIcon = LucideIcons.checkCircle;
-
-  // Rep outcomes history
-  final List<RSRep> _completedReps = [];
-
-  // State machine for rep detection
-  bool _isDown = false;
-  int _lastRepTime = 0;
   Timer? _uiTimer;
 
   @override
   void initState() {
     super.initState();
+    _exercise = seedExercises.firstWhere(
+      (e) => e.id == widget.exerciseId,
+      orElse: () => seedExercises.first,
+    );
+    final config = _exercise.trackingConfig ?? TrackingConfig.defaultSquat;
+    _engine = TrackingEngine(
+      config: config,
+      targetReps: _exercise.targetReps,
+    );
+
     _startTracking();
     _uiTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() {});
@@ -94,66 +93,27 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
           _speeds = Map<int, double>.from(_motion.speed);
           _posture.update(_landmarks, now);
 
-          _processRepStateMachine(now);
+          final prevCount = _engine.currentReps;
+          _engine.processFrame(
+            landmarks: _landmarks,
+            angles: _angles,
+            isPostureGood: _posture.status != PostureStatus.bad,
+            nowMs: now,
+          );
+
+          if (_engine.currentReps > prevCount) {
+            HapticFeedback.mediumImpact();
+          }
+
+          if (_engine.isCompleted) {
+            _finishSession();
+          }
         });
       },
       onError: (Object error) {
         debugPrint('Live tracking error: $error');
       },
     );
-  }
-
-  void _processRepStateMachine(int now) {
-    // Knee joint is 25 (left knee) or 26 (right knee)
-    final kneeAngle = _angles[25] ?? _angles[26];
-    if (kneeAngle == null) return;
-
-    if (kneeAngle < 120 && !_isDown) {
-      _isDown = true;
-      _phase = 'Moving down';
-      _feedbackLine = 'Good depth, keep your back straight';
-      _feedbackColor = RSColors.statusSuccess;
-      _feedbackIcon = LucideIcons.checkCircle;
-    } else if (kneeAngle < 100 && _isDown && _phase == 'Moving down') {
-      _phase = 'Hold';
-      _feedbackLine = 'Hold steady...';
-    } else if (kneeAngle > 155 && _isDown && now - _lastRepTime > 1500) {
-      _isDown = false;
-      _phase = 'Ready';
-      _currentReps++;
-      _lastRepTime = now;
-
-      // Classify rep outcome
-      final isPostureGood = _posture.status != PostureStatus.bad;
-      final outcome = isPostureGood ? RepOutcome.correct : RepOutcome.incorrect;
-
-      _completedReps.add(
-        RSRep(
-          index: _currentReps,
-          outcome: outcome,
-          peakAngle: kneeAngle,
-          durationMs: 2200,
-          feedbackKey: isPostureGood ? 'good_form' : 'knee_valgus',
-        ),
-      );
-
-      HapticFeedback.mediumImpact();
-
-      if (isPostureGood) {
-        _feedbackLine = 'Rep $_currentReps: Great form!';
-        _feedbackColor = RSColors.statusSuccess;
-        _feedbackIcon = LucideIcons.checkCircle;
-      } else {
-        _feedbackLine = 'Rep $_currentReps: Watch your knee alignment';
-        _feedbackColor = RSColors.statusWarningInk;
-        _feedbackIcon = LucideIcons.alertTriangle;
-      }
-
-      // If target reached -> navigate to Summary (19)
-      if (_currentReps >= _targetReps) {
-        _finishSession();
-      }
-    }
   }
 
   void _finishSession() {
@@ -175,7 +135,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
         iconColor: RSColors.statusWarningInk,
         title: 'End this session?',
         body:
-            "You've completed $_currentReps of $_targetReps reps. The remaining reps will be recorded as incomplete.",
+            "You've completed ${_engine.currentReps} of ${_engine.targetReps} reps. The remaining reps will be recorded as incomplete.",
         primaryButtonLabel: 'Continue exercise',
         onPrimaryPressed: () {},
         secondaryButtonLabel: 'Finish session',
@@ -328,11 +288,40 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Knee: ${trackedAngle.round()}° • Target: 90°',
+                        '${_engine.config.joint.toUpperCase()}: ${trackedAngle.round()}° • '
+                        '${_engine.config.type == TrackingType.hold ? 'Target: ${_engine.config.minAngle.toInt()}-${_engine.config.maxAngle.toInt()}°' : 'Target: ${_engine.config.targetAngle.toInt()}°'}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            // ── Not Ready Banner if config is invalid ──────────────
+            if (!_engine.isReady)
+              Positioned(
+                top: 140,
+                left: 16,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: RSColors.statusWarningTint,
+                    borderRadius: BorderRadius.circular(RSRadius.card),
+                    border: Border.all(color: RSColors.statusWarningInk),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(LucideIcons.alertTriangle, color: RSColors.statusWarningInk),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'This exercise is not ready for tracking.',
+                          style: RSText.bodySmallStrong.copyWith(color: RSColors.statusWarningInk),
                         ),
                       ),
                     ],
@@ -365,7 +354,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'REPS',
+                                _engine.config.type == TrackingType.hold ? 'HOLD SETS' : 'REPS',
                                 style: RSText.labelOverline.copyWith(color: RSColors.textSecondary),
                               ),
                               Row(
@@ -373,11 +362,11 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                                 textBaseline: TextBaseline.alphabetic,
                                 children: [
                                   Text(
-                                    '$_currentReps',
+                                    '${_engine.currentReps}',
                                     style: RSText.displayMetric.copyWith(color: RSColors.brandAction),
                                   ),
                                   Text(
-                                    ' / $_targetReps',
+                                    ' / ${_engine.targetReps}',
                                     style: RSText.headingH2.copyWith(color: RSColors.textSecondary),
                                   ),
                                 ],
@@ -392,7 +381,7 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                               borderRadius: BorderRadius.circular(RSRadius.pill),
                             ),
                             child: Text(
-                              _phase,
+                              _engine.phase,
                               style: RSText.captionStrong.copyWith(color: RSColors.brandGreen),
                             ),
                           ),
@@ -400,7 +389,9 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                       ),
                       const SizedBox(height: 10),
                       RSProgressBar(
-                        value: _currentReps / _targetReps,
+                        value: _engine.targetReps > 0
+                            ? (_engine.currentReps / _engine.targetReps).clamp(0.0, 1.0)
+                            : 0.0,
                         height: 6,
                         fillColor: RSColors.brandAction,
                       ),
@@ -415,14 +406,14 @@ class _LiveTrackingScreenState extends State<LiveTrackingScreen> {
                         ),
                         child: Row(
                           children: [
-                            Icon(_feedbackIcon, size: 18, color: _feedbackColor),
+                            Icon(_engine.feedbackIcon, size: 18, color: _engine.feedbackColor),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                _feedbackLine,
+                                _engine.feedbackLine,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: RSText.bodySmallStrong.copyWith(color: _feedbackColor),
+                                style: RSText.bodySmallStrong.copyWith(color: _engine.feedbackColor),
                               ),
                             ),
                           ],

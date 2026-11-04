@@ -3,6 +3,10 @@
 // ---------------------------------------------------------------------------
 
 import 'package:flutter/material.dart';
+import 'tracking_config.dart';
+
+export 'tracking_config.dart';
+export 'assignment.dart';
 
 // ─── USER ───────────────────────────────────────────────────────────────────
 class RSUser {
@@ -118,6 +122,11 @@ class RSExercise {
   final List<String> steps;
   final List<String> watchOutFor;
   final String whatItHelps;
+  final String trackingType; // 'rep' or 'hold'
+  final String cameraView; // 'side' or 'front'
+  final TrackingConfig? trackingConfig;
+  final bool isPublic;
+  final bool isTested;
 
   const RSExercise({
     required this.id,
@@ -131,6 +140,11 @@ class RSExercise {
     required this.steps,
     required this.watchOutFor,
     required this.whatItHelps,
+    this.trackingType = 'rep',
+    this.cameraView = 'side',
+    this.trackingConfig,
+    this.isPublic = true,
+    this.isTested = true,
   });
 }
 
@@ -143,6 +157,7 @@ class RSRep {
   final double? peakAngle;
   final int durationMs;
   final String? feedbackKey;
+  final int? holdSeconds;
 
   const RSRep({
     required this.index,
@@ -150,6 +165,7 @@ class RSRep {
     this.peakAngle,
     required this.durationMs,
     this.feedbackKey,
+    this.holdSeconds,
   });
 }
 
@@ -169,6 +185,9 @@ class RSSession {
   final List<RSRep> reps;
   final RSSessionMetrics? metrics;
   final SyncState syncState;
+  final String? assignmentId;
+  final int? painLevel;
+  final String? painComment;
 
   const RSSession({
     required this.id,
@@ -181,6 +200,9 @@ class RSSession {
     this.reps = const [],
     this.metrics,
     this.syncState = SyncState.local,
+    this.assignmentId,
+    this.painLevel,
+    this.painComment,
   });
 
   int get correctCount => reps.where((r) => r.outcome == RepOutcome.correct).length;
